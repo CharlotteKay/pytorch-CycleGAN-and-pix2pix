@@ -238,7 +238,7 @@ class CycleGANModel(BaseModel):
                                 ('idt_A', idt_A), ('D_B1', D_B1), ('D_B2', D_B2), ('G_B', G_B), ('Cyc_B', Cyc_B), ('idt_B', idt_B)])
         else:
             return OrderedDict([('D_A1', D_A1), ('D_A2', D_A2), ('G_A', G_A), ('Cyc_A', Cyc_A),
-                                ('D_B1', D_B1), ('D_B2', D_B2),, ('G_B', G_B), ('Cyc_B', Cyc_B)])
+                                ('D_B1', D_B1), ('D_B2', D_B2), ('G_B', G_B), ('Cyc_B', Cyc_B)])
 
     def get_current_visuals(self):
         real_A = util.tensor2im(self.real_A.data)

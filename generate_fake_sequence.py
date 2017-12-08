@@ -7,13 +7,21 @@
 # test3/4.MOV: shangxuan
 
 # configurations
-test_video_path = 'datasets/videos/test1.MOV'
-experiment_name = "2russ2qi_D5"
-epoch = 200
 #
 
 import cv2, os, sys, pdb, shutil
 import numpy as np
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument('-n', '--model-name', type=str)
+parser.add_argument('--epoch', type=int, default=200)
+parser.add_argument('-i', '--video-id', type=int)
+args = parser.parse_args()
+
+test_video_path = 'datasets/test/test{}.MOV'.format(args.video_id)
+experiment_name = args.model_name
+epoch = args.epoch
 
 def mkdir_if_not_exist(path):
     if not os.path.exists(path):
@@ -25,7 +33,7 @@ def mkdir_if_not_exist(path):
 
 def main():
     current_dir = os.getcwd()
-    extract_folder = os.path.join(os.getcwd(), test_video_path.replace('.MOV', ''))
+    extract_folder = os.path.join(os.getcwd(), 'datasets/test/{}'.format(experiment_name))
     mkdir_if_not_exist(extract_folder)
 
     # resize video
@@ -49,7 +57,7 @@ def main():
     os.system(extract_audio_command)
 
     # forward all the images
-    run_pytorch_command = ('python test.py --gpu_ids 0 --which_epoch %d --dataroot %s --name %s --model cycle_gan --phase test --serial_batches --resize_or_crop scale_width --which_direction BtoA' % (epoch, extract_folder, experiment_name))
+    run_pytorch_command = ('python test.py --gpu_ids 2 --which_epoch %d --dataroot %s --name %s --model cycle_gan --phase test --serial_batches --resize_or_crop scale_width --which_direction BtoA' % (epoch, extract_folder, experiment_name))
     os.system(run_pytorch_command)
 
     fake_folder = extract_folder + "_fake"
@@ -84,9 +92,15 @@ def main():
     print("Finished getting fake video (without sound)")
 
     # add audio to video
-    output_video_path = test_video_path.replace('.MOV', '_output.mkv')
+    output_video_path =  os.path.join(fake_folder, 'fake_video.mkv')
     add_audio_command = "ffmpeg -i " + output_video_no_sound_path + " -i " + audio_path + " -map 0 -map 1 -codec copy " + output_video_path
     os.system(add_audio_command)
+
+    # remove duplicated test images
+    os.system('rm -rf %s' % extract_folder)
+    
+    # remove images generated from test a
+    os.system('rm {ff}/*real_A.png {ff}/*fake_B.png {ff}/*rec_A.png'.format(ff=fake_folder))
 
 if __name__ == "__main__":
     main()
